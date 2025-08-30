@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  pg:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.pg
+    container_name: qdb-pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tpch
+    ports:
+      - "5432:5432"
+  qexe:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.qexe
+    container_name: qdb-qexe
+    env_file:
+      - .env
+    environment:
+      QPANDA_API_KEY: ${QPANDA_API_KEY:-DUMMY_KEY}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - pg

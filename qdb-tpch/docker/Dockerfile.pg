@@ -1,0 +1,15 @@
+FROM postgres:16
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential ca-certificates git make gcc postgresql-server-dev-16 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+COPY src/pg_qdb /build/pg_qdb
+RUN cd /build/pg_qdb && make && make install
+
+# Create config to preload extension at cluster start (optional)
+RUN echo "shared_preload_libraries='qdb'" >> /usr/share/postgresql/postgresql.conf.sample
+
+# Init script: create telemetry table
+COPY src/pg_qdb/qdb--1.0.sql /docker-entrypoint-initdb.d/01_qdb.sql
